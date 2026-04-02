@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SunRoute — Holiday Booking</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:    #2563eb;
+    --blue-d:  #1d4ed8;
+    --sky:     #e0f2fe;
+    --green:   #16a34a;
+    --amber:   #d97706;
+    --red:     #dc2626;
+    --text:    #111827;
+    --sub:     #6b7280;
+    --border:  #e5e7eb;
+    --bg:      #f9fafb;
+    --white:   #ffffff;
+    --radius:  12px;
+    --shadow:  0 1px 4px rgba(0,0,0,.08), 0 2px 12px rgba(0,0,0,.06);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--bg);
+    min-height: 100vh;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #0ea5e9 100%);
+    color: #fff;
+    padding: 60px 24px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-label {
+    display: inline-block;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 99px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    letter-spacing: -.5px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .hero p {
+    font-size: 16px;
+    opacity: .85;
+    position: relative;
+  }
+
+  /* ── MAIN CARD ── */
+  .container {
+    max-width: 820px;
+    margin: -40px auto 60px;
+    padding: 0 16px;
+    position: relative;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 18px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .tab {
+    flex: 1;
+    padding: 16px 10px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sub);
+    cursor: pointer;
+    transition: color .15s, background .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab:hover { color: var(--text); background: var(--white); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); background: var(--white); }
+  .tab-icon { font-size: 18px; }
+
+  /* ── FORM PANELS ── */
+  .panel { display: none; padding: 28px 28px 24px; }
+  .panel.active { display: block; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .span2 { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--sub);
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color .15s, box-shadow .15s;
+    outline: none;
+    width: 100%;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field .field-hint { font-size: 11.5px; color: var(--sub); }
+
+  /* counter widget */
+  .counter {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    overflow: hidden;
+    height: 44px;
+  }
+  .counter button {
+    width: 44px;
+    height: 100%;
+    border: none;
+    background: var(--bg);
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--blue);
+    font-weight: 700;
+    transition: background .15s;
+    flex-shrink: 0;
+  }
+  .counter button:hover { background: var(--sky); }
+  .counter input {
+    flex: 1;
+    border: none !important;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    background: transparent;
+    padding: 0 !important;
+    box-shadow: none !important;
+    min-width: 0;
+  }
+  .counter input:focus { box-shadow: none !important; }
+
+  /* trip type radio */
+  .trip-type-group {
+    display: flex;
+    gap: 10px;
+  }
+  .trip-type-group label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--sub);
+    transition: border-color .15s, color .15s, background .15s;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .trip-type-group input[type="radio"] { display: none; }
+  .trip-type-group input[type="radio"]:checked + span { color: var(--blue); }
+  .trip-type-group label:has(input:checked) {
+    border-color: var(--blue);
+    background: var(--sky);
+    color: var(--blue);
+  }
+
+  /* section heading inside form */
+  .form-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--sub);
+    margin: 20px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* destination cards */
+  .dest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .dest-card {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, transform .12s;
+    user-select: none;
+  }
+  .dest-card:hover { border-color: #93c5fd; background: #f0f9ff; transform: translateY(-2px); }
+  .dest-card.selected { border-color: var(--blue); background: var(--sky); }
+  .dest-flag { font-size: 28px; margin-bottom: 6px; }
+  .dest-name { font-size: 13px; font-weight: 700; }
+  .dest-country { font-size: 11px; color: var(--sub); margin-top: 1px; }
+  .dest-price { font-size: 12px; font-weight: 700; color: var(--green); margin-top: 4px; }
+
+  /* ── SUBMIT BUTTON ── */
+  .submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .price-preview {
+    font-size: 13px;
+    color: var(--sub);
+  }
+  .price-preview strong { font-size: 20px; color: var(--text); }
+
+  .btn-submit {
+    padding: 13px 32px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s, transform .12s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-submit:hover { background: var(--blue-d); transform: translateY(-1px); }
+  .btn-submit:active { transform: translateY(0); }
+
+  /* ── CONFIRMATION ── */
+  #confirmation {
+    display: none;
+    padding: 48px 28px;
+    text-align: center;
+  }
+  #confirmation.active { display: block; }
+  .confirm-icon { font-size: 56px; margin-bottom: 16px; }
+  .confirm-ref {
+    display: inline-block;
+    background: var(--sky);
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 99px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  #confirmation h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+  #confirmation p { color: var(--sub); font-size: 14px; margin-bottom: 24px; }
+
+  .booking-summary {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: left;
+    margin: 0 auto 24px;
+    max-width: 480px;
+  }
+  .booking-summary .sum-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .booking-summary .sum-row:last-child { border-bottom: none; font-weight: 700; font-size: 15px; }
+  .booking-summary .sum-row span:first-child { color: var(--sub); }
+  .booking-summary .sum-row span:last-child { font-weight: 600; }
+
+  .btn-back {
+    padding: 11px 24px;
+    background: transparent;
+    color: var(--blue);
+    border: 1.5px solid var(--blue);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-back:hover { background: var(--sky); }
+
+  /* ── ERROR ── */
+  .error-msg {
+    display: none;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: var(--red);
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 14px;
+  }
+  .error-msg.show { display: block; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: var(--sub);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 560px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .span2 { grid-column: 1; }
+    .panel { padding: 20px 16px; }
+    .tab { font-size: 12px; padding: 14px 6px; }
+    .tab-icon { display: none; }
+    .trip-type-group { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">✈️ Holiday Booking</div>
+  <h1>Where to next?</h1>
+  <p>Find your perfect getaway — flights, hotels &amp; packages</p>
+</div>
+
+<!-- MAIN CARD -->
+<div class="container">
+  <div class="card" id="bookingCard">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('flights')" id="tab-flights">
+        <span class="tab-icon">✈️</span> Flights
+      </button>
+      <button class="tab" onclick="switchTab('hotels')" id="tab-hotels">
+        <span class="tab-icon">🏨</span> Hotels
+      </button>
+      <button class="tab" onclick="switchTab('packages')" id="tab-packages">
+        <span class="tab-icon">🌴</span> Packages
+      </button>
+    </div>
+
+    <!-- ══ FLIGHTS PANEL ══ -->
+    <div class="panel active" id="panel-flights">
+
+      <div class="form-section-title">Trip Type</div>
+      <div class="trip-type-group" id="tripTypeGroup">
+        <label><input type="radio" name="tripType" value="return" checked onchange="updateReturnField()"><span>↔ Return</span></label>
+        <label><input type="radio" name="tripType" value="oneway" onchange="updateReturnField()"><span>→ One Way</span></label>
+        <label><input type="radio" name="tripType" value="multi" onchange="updateReturnField()"><span>⤳ Multi-City</span></label>
+      </div>
+
+      <div class="form-section-title">Popular Destinations</div>
+      <div class="dest-grid" id="destGrid">
+        <!-- injected by JS -->
+      </div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:4px">Or type a custom destination below</div>
+
+      <div class="form-section-title">Flight Details</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>From</label>
+          <input type="text" id="fromCity" placeholder="City or airport" />
+        </div>
+        <div class="field">
+          <label>To</label>
+          <input type="text" id="toCity" placeholder="City or airport" />
+        </div>
+        <div class="field">
+          <label>Departure Date</label>
+          <input type="date" id="departDate" />
+        </div>
+        <div class="field" id="returnDateField">
+          <label>Return Date</label>
+          <input type="date" id="returnDate" />
+        </div>
+        <div class="field">
+          <label>Adults (12+)</label>
+          <div class="counter">
+            <button type="button" onclick="adj('adults',-1)">−</button>
+            <input type="number" id="adults" value="1" min="1" max="9" readonly />
+            <button type="button" onclick="adj('adults',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Children (2–11)</label>
+          <div class="counter">
+            <button type="button" onclick="adj('children',-1)">−</button>
+            <input type="number" id="children" value="0" min="0" max="9" readonly />
+            <button type="button" onclick="adj('children',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Infants (under 2)</label>
+          <div class="counter">
+            <button type="button" onclick="adj('infants',-1)">−</button>
+            <input type="number" id="infants" value="0" min="0" max="4" readonly />
+            <button type="button" onclick="adj('infants',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Cabin Class</label>
+          <select id="cabinClass">
+            <option value="economy">Economy</option>
+            <option value="premium_economy">Premium Economy</option>
+            <option value="business">Business Class</option>
+            <option value="first">First Class</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">Passenger Details</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="firstName" placeholder="Jane" />
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="lastName" placeholder="Smith" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="jane@example.com" />
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="tel" id="phone" placeholder="+44 7700 900000" />
+        </div>
+        <div class="field span2">
+          <label>Special Requests</label>
+          <textarea id="requests" placeholder="Dietary requirements, wheelchair assistance, seat preferences…"></textarea>
+        </div>
+      </div>
+
+      <div class="error-msg" id="flightError"></div>
+
+      <div class="submit-row">
+        <div class="price-preview">
+          Estimated total: <strong id="priceDisplay">£0</strong>
+        </div>
+        <button class="btn-submit" onclick="submitBooking('flight')">
+          Book Now ✈️
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ HOTELS PANEL ══ -->
+    <div class="panel" id="panel-hotels">
+      <div class="form-section-title">Destination &amp; Dates</div>
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Destination</label>
+          <input type="text" id="hotelDest" placeholder="City, region or property name" />
+        </div>
+        <div class="field">
+          <label>Check-in</label>
+          <input type="date" id="hotelCheckin" />
+        </div>
+        <div class="field">
+          <label>Check-out</label>
+          <input type="date" id="hotelCheckout" />
+        </div>
+        <div class="field">
+          <label>Rooms</label>
+          <div class="counter">
+            <button type="button" onclick="adj('hotelRooms',-1)">−</button>
+            <input type="number" id="hotelRooms" value="1" min="1" max="10" readonly />
+            <button type="button" onclick="adj('hotelRooms',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Guests</label>
+          <div class="counter">
+            <button type="button" onclick="adj('hotelGuests',-1)">−</button>
+            <input type="number" id="hotelGuests" value="2" min="1" max="20" readonly />
+            <button type="button" onclick="adj('hotelGuests',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Star Rating</label>
+          <select id="hotelStars">
+            <option value="any">Any</option>
+            <option value="3">3 Stars ★★★</option>
+            <option value="4" selected>4 Stars ★★★★</option>
+            <option value="5">5 Stars ★★★★★</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Board Basis</label>
+          <select id="boardBasis">
+            <option value="room_only">Room Only</option>
+            <option value="bb">Bed &amp; Breakfast</option>
+            <option value="hb">Half Board</option>
+            <option value="fb">Full Board</option>
+            <option value="ai">All Inclusive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">Guest Details</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="hotelFirst" placeholder="Jane" />
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="hotelLast" placeholder="Smith" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="hotelEmail" placeholder="jane@example.com" />
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="tel" id="hotelPhone" placeholder="+44 7700 900000" />
+        </div>
+      </div>
+
+      <div class="error-msg" id="hotelError"></div>
+
+      <div class="submit-row">
+        <div class="price-preview">
+          Estimated total: <strong id="hotelPriceDisplay">£0</strong>
+        </div>
+        <button class="btn-submit" onclick="submitBooking('hotel')">
+          Book Hotel 🏨
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ PACKAGES PANEL ══ -->
+    <div class="panel" id="panel-packages">
+      <div class="form-section-title">Package Details</div>
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Destination</label>
+          <input type="text" id="pkgDest" placeholder="e.g. Santorini, Greece" />
+        </div>
+        <div class="field">
+          <label>Departure Date</label>
+          <input type="date" id="pkgDepart" />
+        </div>
+        <div class="field">
+          <label>Duration</label>
+          <select id="pkgDuration">
+            <option value="3">3 nights</option>
+            <option value="5">5 nights</option>
+            <option value="7" selected>7 nights</option>
+            <option value="10">10 nights</option>
+            <option value="14">14 nights</option>
+            <option value="21">21 nights</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Adults</label>
+          <div class="counter">
+            <button type="button" onclick="adj('pkgAdults',-1)">−</button>
+            <input type="number" id="pkgAdults" value="2" min="1" max="9" readonly />
+            <button type="button" onclick="adj('pkgAdults',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Children</label>
+          <div class="counter">
+            <button type="button" onclick="adj('pkgChildren',-1)">−</button>
+            <input type="number" id="pkgChildren" value="0" min="0" max="9" readonly />
+            <button type="button" onclick="adj('pkgChildren',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Package Type</label>
+          <select id="pkgType">
+            <option value="flight_hotel">Flight + Hotel</option>
+            <option value="flight_hotel_car">Flight + Hotel + Car</option>
+            <option value="all_inclusive">All Inclusive</option>
+            <option value="luxury">Luxury Escape</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Budget per person</label>
+          <select id="pkgBudget">
+            <option value="budget">Budget (up to £500)</option>
+            <option value="mid" selected>Mid-range (£500–£1,500)</option>
+            <option value="premium">Premium (£1,500–£3,000)</option>
+            <option value="luxury">Luxury (£3,000+)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">Lead Traveller</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="pkgFirst" placeholder="Jane" />
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="pkgLast" placeholder="Smith" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="pkgEmail" placeholder="jane@example.com" />
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="tel" id="pkgPhone" placeholder="+44 7700 900000" />
+        </div>
+        <div class="field span2">
+          <label>Any special requirements?</label>
+          <textarea id="pkgRequests" placeholder="Anniversary trip, accessibility needs, dietary requirements…"></textarea>
+        </div>
+      </div>
+
+      <div class="error-msg" id="pkgError"></div>
+
+      <div class="submit-row">
+        <div class="price-preview">
+          Estimated total: <strong id="pkgPriceDisplay">£0</strong>
+        </div>
+        <button class="btn-submit" onclick="submitBooking('package')">
+          Book Package 🌴
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ CONFIRMATION ══ -->
+    <div id="confirmation">
+      <div class="confirm-icon">🎉</div>
+      <div class="confirm-ref" id="confirmRef">REF: SR-000000</div>
+      <h2>Booking Confirmed!</h2>
+      <p>Your holiday is booked. A confirmation summary is shown below.<br>Check your email for the full itinerary.</p>
+      <div class="booking-summary" id="bookingSummary"></div>
+      <button class="btn-back" onclick="newBooking()">← Book Another Holiday</button>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /container -->
+
+<div class="footer">SunRoute &copy; 2026 &nbsp;·&nbsp; Demo booking site &nbsp;·&nbsp; No real transactions are made</div>
+
+<script>
+// ── Destinations ──────────────────────────────────────────
+const DESTINATIONS = [
+  { flag:'🇬🇷', name:'Santorini', country:'Greece',   base: 320, id:'santorini' },
+  { flag:'🇪🇸', name:'Barcelona', country:'Spain',    base: 180, id:'barcelona' },
+  { flag:'🇯🇵', name:'Tokyo',     country:'Japan',    base: 650, id:'tokyo'     },
+  { flag:'🇹🇭', name:'Bangkok',   country:'Thailand', base: 480, id:'bangkok'   },
+  { flag:'🇦🇪', name:'Dubai',     country:'UAE',      base: 390, id:'dubai'     },
+  { flag:'🇺🇸', name:'New York',  country:'USA',      base: 420, id:'newyork'   },
+  { flag:'🇲🇻', name:'Maldives',  country:'Maldives', base: 890, id:'maldives'  },
+  { flag:'🇮🇹', name:'Rome',      country:'Italy',    base: 200, id:'rome'      },
+];
+
+let selectedDest = null;
+
+function renderDestinations() {
+  const grid = document.getElementById('destGrid');
+  grid.innerHTML = DESTINATIONS.map(d => `
+    <div class="dest-card" id="dest-${d.id}" onclick="selectDest('${d.id}')">
+      <div class="dest-flag">${d.flag}</div>
+      <div class="dest-name">${d.name}</div>
+      <div class="dest-country">${d.country}</div>
+      <div class="dest-price">from £${d.base}</div>
+    </div>
+  `).join('');
+}
+
+function selectDest(id) {
+  selectedDest = DESTINATIONS.find(d => d.id === id);
+  document.querySelectorAll('.dest-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('dest-' + id).classList.add('selected');
+  document.getElementById('toCity').value = `${selectedDest.name}, ${selectedDest.country}`;
+  updatePrice();
+}
+
+// ── Counter widget ────────────────────────────────────────
+function adj(id, delta) {
+  const el = document.getElementById(id);
+  const min = parseInt(el.min) || 0;
+  const max = parseInt(el.max) || 99;
+  el.value = Math.min(max, Math.max(min, parseInt(el.value) + delta));
+  updatePrice();
+  updateHotelPrice();
+  updatePkgPrice();
+}
+
+// ── Tabs ─────────────────────────────────────────────────
+function switchTab(tab) {
+  ['flights','hotels','packages'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+// ── Return date field toggle ──────────────────────────────
+function updateReturnField() {
+  const type = document.querySelector('input[name="tripType"]:checked').value;
+  document.getElementById('returnDateField').style.display = type === 'oneway' ? 'none' : '';
+  updatePrice();
+}
+
+// ── Price estimates (fictional) ───────────────────────────
+function updatePrice() {
+  const adults   = parseInt(document.getElementById('adults').value)   || 1;
+  const children = parseInt(document.getElementById('children').value) || 0;
+  const infants  = parseInt(document.getElementById('infants').value)  || 0;
+  const cabinMult = { economy:1, premium_economy:1.5, business:2.8, first:4.5 };
+  const cabin  = cabinMult[document.getElementById('cabinClass').value] || 1;
+  const type   = document.querySelector('input[name="tripType"]:checked')?.value;
+  const rtMult = type === 'oneway' ? 1 : 1.9;
+  const base   = selectedDest ? selectedDest.base : 250;
+  const total  = Math.round((adults * base + children * base * 0.75 + infants * 50) * cabin * rtMult);
+  document.getElementById('priceDisplay').textContent = '£' + total.toLocaleString();
+  return total;
+}
+
+function updateHotelPrice() {
+  const rooms  = parseInt(document.getElementById('hotelRooms').value)  || 1;
+  const stars  = parseInt(document.getElementById('hotelStars').value)  || 4;
+  const checkin  = document.getElementById('hotelCheckin').value;
+  const checkout = document.getElementById('hotelCheckout').value;
+  let nights = 1;
+  if (checkin && checkout) {
+    nights = Math.max(1, Math.round((new Date(checkout) - new Date(checkin)) / 864e5));
+  }
+  const starMult = { 3: 80, 4: 140, 5: 280, any: 100 };
+  const nightly = starMult[document.getElementById('hotelStars').value] || 120;
+  const total = rooms * nights * nightly;
+  document.getElementById('hotelPriceDisplay').textContent = '£' + total.toLocaleString();
+  return total;
+}
+
+function updatePkgPrice() {
+  const adults   = parseInt(document.getElementById('pkgAdults').value)   || 2;
+  const children = parseInt(document.getElementById('pkgChildren').value) || 0;
+  const nights   = parseInt(document.getElementById('pkgDuration').value) || 7;
+  const budgetMult = { budget: 350, mid: 900, premium: 2200, luxury: 4500 };
+  const pp    = budgetMult[document.getElementById('pkgBudget').value] || 900;
+  const total = Math.round((adults + children * 0.7) * pp * (nights / 7));
+  document.getElementById('pkgPriceDisplay').textContent = '£' + total.toLocaleString();
+  return total;
+}
+
+// ── Validation ────────────────────────────────────────────
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+// ── Reference number ─────────────────────────────────────
+function genRef() {
+  return 'SR-' + Math.random().toString(36).slice(2,8).toUpperCase();
+}
+
+// ── Submit ────────────────────────────────────────────────
+function submitBooking(type) {
+  let rows = [];
+  let valid = true;
+  let errorId = '';
+  const ref = genRef();
+
+  if (type === 'flight') {
+    errorId = 'flightError';
+    const from     = document.getElementById('fromCity').value.trim();
+    const to       = document.getElementById('toCity').value.trim();
+    const depart   = document.getElementById('departDate').value;
+    const tripType = document.querySelector('input[name="tripType"]:checked').value;
+    const ret      = document.getElementById('returnDate').value;
+    const first    = document.getElementById('firstName').value.trim();
+    const last     = document.getElementById('lastName').value.trim();
+    const email    = document.getElementById('email').value.trim();
+    const adults   = document.getElementById('adults').value;
+    const children = document.getElementById('children').value;
+    const infants  = document.getElementById('infants').value;
+    const cabin    = document.getElementById('cabinClass');
+    const cabinTxt = cabin.options[cabin.selectedIndex].text;
+
+    if (!from || !to) { showError(errorId, 'Please enter departure and destination cities.'); return; }
+    if (!depart) { showError(errorId, 'Please select a departure date.'); return; }
+    if (tripType !== 'oneway' && !ret) { showError(errorId, 'Please select a return date.'); return; }
+    if (ret && depart && ret < depart) { showError(errorId, 'Return date must be after departure date.'); return; }
+    if (!first || !last) { showError(errorId, 'Please enter the passenger\'s name.'); return; }
+    if (!validateEmail(email)) { showError(errorId, 'Please enter a valid email address.'); return; }
+
+    const price = updatePrice();
+    const travellerStr = [
+      adults > 0 ? adults + ' adult' + (adults > 1 ? 's' : '') : '',
+      children > 0 ? children + ' child' + (children > 1 ? 'ren' : '') : '',
+      infants > 0 ? infants + ' infant' + (infants > 1 ? 's' : '') : '',
+    ].filter(Boolean).join(', ');
+
+    rows = [
+      ['Type',        '✈️ Flight'],
+      ['Route',       from + ' → ' + to],
+      ['Departure',   fmtDate(depart)],
+      ['Return',      tripType === 'oneway' ? 'One way' : fmtDate(ret)],
+      ['Travellers',  travellerStr],
+      ['Cabin',       cabinTxt],
+      ['Passenger',   first + ' ' + last],
+      ['Email',       email],
+      ['Total',       '£' + price.toLocaleString()],
+    ];
+  }
+
+  else if (type === 'hotel') {
+    errorId = 'hotelError';
+    const dest    = document.getElementById('hotelDest').value.trim();
+    const cin     = document.getElementById('hotelCheckin').value;
+    const cout    = document.getElementById('hotelCheckout').value;
+    const rooms   = document.getElementById('hotelRooms').value;
+    const guests  = document.getElementById('hotelGuests').value;
+    const first   = document.getElementById('hotelFirst').value.trim();
+    const last    = document.getElementById('hotelLast').value.trim();
+    const email   = document.getElementById('hotelEmail').value.trim();
+    const board   = document.getElementById('boardBasis');
+    const boardTxt= board.options[board.selectedIndex].text;
+    const stars   = document.getElementById('hotelStars');
+    const starsTxt= stars.options[stars.selectedIndex].text;
+
+    if (!dest) { showError(errorId, 'Please enter a destination.'); return; }
+    if (!cin || !cout) { showError(errorId, 'Please select check-in and check-out dates.'); return; }
+    if (cout <= cin) { showError(errorId, 'Check-out must be after check-in.'); return; }
+    if (!first || !last) { showError(errorId, 'Please enter the guest\'s name.'); return; }
+    if (!validateEmail(email)) { showError(errorId, 'Please enter a valid email address.'); return; }
+
+    const price  = updateHotelPrice();
+    const nights = Math.round((new Date(cout) - new Date(cin)) / 864e5);
+
+    rows = [
+      ['Type',       '🏨 Hotel'],
+      ['Destination', dest],
+      ['Check-in',   fmtDate(cin)],
+      ['Check-out',  fmtDate(cout)],
+      ['Duration',   nights + ' night' + (nights > 1 ? 's' : '')],
+      ['Rooms',      rooms + ' room' + (rooms > 1 ? 's' : '')],
+      ['Guests',     guests],
+      ['Star Rating', starsTxt],
+      ['Board Basis', boardTxt],
+      ['Guest',       first + ' ' + last],
+      ['Email',       email],
+      ['Total',       '£' + price.toLocaleString()],
+    ];
+  }
+
+  else if (type === 'package') {
+    errorId = 'pkgError';
+    const dest   = document.getElementById('pkgDest').value.trim();
+    const depart = document.getElementById('pkgDepart').value;
+    const dur    = document.getElementById('pkgDuration');
+    const durTxt = dur.options[dur.selectedIndex].text;
+    const adults = document.getElementById('pkgAdults').value;
+    const kids   = document.getElementById('pkgChildren').value;
+    const first  = document.getElementById('pkgFirst').value.trim();
+    const last   = document.getElementById('pkgLast').value.trim();
+    const email  = document.getElementById('pkgEmail').value.trim();
+    const pkgEl  = document.getElementById('pkgType');
+    const pkgTxt = pkgEl.options[pkgEl.selectedIndex].text;
+
+    if (!dest) { showError(errorId, 'Please enter a destination.'); return; }
+    if (!depart) { showError(errorId, 'Please select a departure date.'); return; }
+    if (!first || !last) { showError(errorId, 'Please enter your name.'); return; }
+    if (!validateEmail(email)) { showError(errorId, 'Please enter a valid email address.'); return; }
+
+    const price = updatePkgPrice();
+    const travellerStr = adults + ' adult' + (adults > 1 ? 's' : '') + (kids > 0 ? ', ' + kids + ' child' + (kids > 1 ? 'ren' : '') : '');
+
+    rows = [
+      ['Type',        '🌴 Holiday Package'],
+      ['Destination', dest],
+      ['Departure',   fmtDate(depart)],
+      ['Duration',    durTxt],
+      ['Travellers',  travellerStr],
+      ['Package',     pkgTxt],
+      ['Lead Name',   first + ' ' + last],
+      ['Email',       email],
+      ['Total',       '£' + price.toLocaleString()],
+    ];
+  }
+
+  // Show confirmation
+  document.getElementById('confirmRef').textContent = 'REF: ' + ref;
+  document.getElementById('bookingSummary').innerHTML = rows.map(([k, v]) => `
+    <div class="sum-row">
+      <span>${k}</span>
+      <span>${escHtml(String(v))}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('bookingCard').querySelector('.tabs').style.display = 'none';
+  ['flights','hotels','packages'].forEach(t => document.getElementById('panel-'+t).classList.remove('active'));
+  document.getElementById('confirmation').classList.add('active');
+  document.getElementById('bookingCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function newBooking() {
+  document.getElementById('confirmation').classList.remove('active');
+  document.getElementById('bookingCard').querySelector('.tabs').style.display = '';
+  switchTab('flights');
+  document.getElementById('panel-flights').classList.add('active');
+  // reset flight form
+  ['fromCity','toCity','departDate','returnDate','firstName','lastName','email','phone','requests'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('adults').value = 1;
+  document.getElementById('children').value = 0;
+  document.getElementById('infants').value = 0;
+  selectedDest = null;
+  document.querySelectorAll('.dest-card').forEach(c => c.classList.remove('selected'));
+  updatePrice();
+}
+
+// ── Utility ───────────────────────────────────────────────
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Live price updates ────────────────────────────────────
+document.addEventListener('change', () => { updatePrice(); updateHotelPrice(); updatePkgPrice(); });
+document.addEventListener('input',  () => { updatePrice(); updateHotelPrice(); updatePkgPrice(); });
+
+// Set default dates
+const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+const oneWeek  = new Date(); oneWeek.setDate(oneWeek.getDate() + 8);
+const fmtInput = d => d.toISOString().slice(0,10);
+
+document.getElementById('departDate').value    = fmtInput(tomorrow);
+document.getElementById('returnDate').value    = fmtInput(oneWeek);
+document.getElementById('hotelCheckin').value  = fmtInput(tomorrow);
+document.getElementById('hotelCheckout').value = fmtInput(oneWeek);
+document.getElementById('pkgDepart').value     = fmtInput(tomorrow);
+
+// Boot
+renderDestinations();
+updatePrice();
+updateHotelPrice();
+updatePkgPrice();
+</script>
+</body>
+</html>
